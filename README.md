@@ -30,6 +30,11 @@ Root-cause analysis identifies the highest-priority blocked or rejected task
 frontier and returns its dependency chain. Downstream impact analysis traverses
 dependent tasks and summarizes affected projected outcomes and outcome tags.
 
+Playbook recommendations are configuration-driven and deterministic. Matching
+actions are ranked by breach resolution, approval tier, and disruption, persisted
+idempotently, and auto-tier actions execute immediately. Approval-tier actions
+require the configured manager/HR approvals before their effects are applied.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
