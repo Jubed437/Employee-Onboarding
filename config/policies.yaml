@@ -1,0 +1,5 @@
+slack_buffer_days: 1
+rework_days: 2
+owner_overdue_penalty_days: 0.5
+owner_overdue_penalty_cap_days: 2
+max_recommendations_per_risk: 3

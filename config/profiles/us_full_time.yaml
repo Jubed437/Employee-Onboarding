@@ -1,0 +1,13 @@
+profile: us_full_time
+display_name: US Full-Time (stub)
+defaults:
+  payroll_cutoff_day: 15
+  business_calendar: holidays_in
+variants: {}
+tasks:
+  HR-01:
+    title: Offer accepted, hire record created
+    owner_role: HR
+    duration_days: 0
+    deadline: {relative_to: join_date, offset_days: -14}
+    flags: {mandatory: true}

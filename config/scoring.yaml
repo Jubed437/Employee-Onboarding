@@ -1,0 +1,2 @@
+weights: {critical: 0.40, slack: 0.25, compliance: 0.20, timeliness: 0.15}
+bands: {ready_min: 85, watch_min: 60}
