@@ -1,0 +1,209 @@
+profile: india_full_time
+display_name: India Full-Time
+defaults:
+  payroll_cutoff_day: 20
+  business_calendar: holidays_in
+variants:
+  experienced:
+    add_tasks: [HR-06, PAY-05]
+  fresher:
+    remove_tasks: [HR-06, PAY-05]
+  remote:
+    remove_tasks: [IT-04]
+    override:
+      IT-01:
+        duration_days: 7
+  office: {}
+tasks:
+  HR-01:
+    title: Offer accepted, hire record created
+    owner_role: HR
+    duration_days: 0
+    deadline: {relative_to: join_date, offset_days: -14}
+    flags: {mandatory: true}
+  HR-02:
+    title: Appointment letter issued and e-signed
+    owner_role: HR
+    depends_on: [HR-01]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: -10}
+    flags: {mandatory: true}
+  HR-03:
+    title: Submit personal details and document pack
+    owner_role: NEW_HIRE
+    depends_on: [HR-02]
+    duration_days: 3
+    deadline: {relative_to: join_date, offset_days: -8}
+    flags: {mandatory: true}
+  HR-04:
+    title: Document verification
+    owner_role: HR
+    depends_on: [HR-03]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: -6}
+    flags: {critical: true, mandatory: true, compliance: true}
+  HR-05:
+    title: Background verification
+    owner_role: HR
+    depends_on: [HR-03]
+    duration_days: 7
+    deadline: {relative_to: join_date, offset_days: -1}
+    external_sla_days: 7
+    flags: {critical: true, mandatory: true, compliance: true}
+    outcome_tags: [BGV_CLEARANCE_PENDING]
+  HR-06:
+    title: Previous employer documents
+    owner_role: NEW_HIRE
+    depends_on: [HR-03]
+    duration_days: 5
+    deadline: {relative_to: join_date, offset_days: 30}
+    flags: {compliance: true}
+  PAY-01:
+    title: Submit bank details and proof
+    owner_role: NEW_HIRE
+    depends_on: [HR-03]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: -7}
+    flags: {mandatory: true}
+  PAY-02:
+    title: Bank proof verification
+    owner_role: PAYROLL
+    depends_on: [PAY-01]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: -5}
+    flags: {mandatory: true}
+    outcome_tags: [PAYROLL_SETUP_DELAYED]
+  PAY-03:
+    title: Provide UAN and EPF details
+    owner_role: NEW_HIRE
+    depends_on: [HR-04]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: -3}
+    flags: {mandatory: true, compliance: true}
+  PAY-04:
+    title: PF, ESI and professional tax setup
+    owner_role: PAYROLL
+    depends_on: [PAY-02, PAY-03]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: 0}
+    flags: {mandatory: true, compliance: true}
+    outcome_tags: [PAYROLL_SETUP_DELAYED]
+  PAY-05:
+    title: Tax regime and previous income details
+    owner_role: NEW_HIRE
+    depends_on: [HR-04]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: 3}
+    flags: {compliance: true}
+  PAY-06:
+    title: Payroll master data complete
+    owner_role: PAYROLL
+    depends_on: [PAY-02, PAY-04]
+    duration_days: 1
+    deadline: {relative_to: payroll_cutoff, offset_days: 0}
+    flags: {critical: true, compliance: true}
+    outcome_tags: [FIRST_SALARY_AT_RISK]
+  IT-01:
+    title: Laptop allocated and shipped or ready
+    owner_role: IT
+    depends_on: [HR-02]
+    duration_days: 4
+    deadline: {relative_to: join_date, offset_days: -3}
+    flags: {critical: true, mandatory: true}
+    outcome_tags: [DAY1_EQUIPMENT_AT_RISK]
+  IT-02:
+    title: Email and directory account
+    owner_role: IT
+    depends_on: [HR-04]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: -2}
+    flags: {mandatory: true}
+  IT-03:
+    title: Access provisioning
+    owner_role: IT
+    depends_on: [IT-02, MGR-01]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: -1}
+    flags: {critical: true, mandatory: true}
+    outcome_tags: [DAY1_ACCESS_AT_RISK]
+  IT-04:
+    title: Building access and ID card
+    owner_role: IT
+    depends_on: [HR-04]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: 0}
+    flags: {mandatory: true}
+  IT-05:
+    title: Sensitive system access
+    owner_role: IT
+    depends_on: [IT-03, HR-05]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: 3}
+    flags: {compliance: true}
+    outcome_tags: [SENSITIVE_ACCESS_DELAYED]
+  BEN-01:
+    title: Health insurance enrolment opened
+    owner_role: BENEFITS
+    depends_on: [HR-04]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: 0}
+  BEN-02:
+    title: Dependants details and enrolment filed
+    owner_role: BENEFITS
+    depends_on: [BEN-01, PAY-04]
+    duration_days: 3
+    deadline: {relative_to: join_date, offset_days: 7}
+    flags: {compliance: true}
+    outcome_tags: [INSURANCE_DEDUCTION_DELAYED]
+  BEN-03:
+    title: Insurer confirmation and e-card
+    owner_role: BENEFITS
+    depends_on: [BEN-02]
+    duration_days: 5
+    deadline: {relative_to: join_date, offset_days: 15}
+  LRN-01:
+    title: Policy acknowledgements and NDA
+    owner_role: NEW_HIRE
+    depends_on: [HR-02]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: 0}
+    flags: {mandatory: true, compliance: true}
+  LRN-02:
+    title: Mandatory trainings
+    owner_role: NEW_HIRE
+    depends_on: [IT-02]
+    duration_days: 3
+    deadline: {relative_to: join_date, offset_days: 14}
+    flags: {compliance: true}
+  LRN-03:
+    title: Role-specific learning path assigned
+    owner_role: MANAGER
+    depends_on: [MGR-02]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: 1}
+  MGR-01:
+    title: Buddy assigned
+    owner_role: MANAGER
+    depends_on: [HR-02]
+    duration_days: 1
+    deadline: {relative_to: join_date, offset_days: -5}
+    flags: {mandatory: true}
+  MGR-02:
+    title: First-week plan and 30/60/90 goals
+    owner_role: MANAGER
+    depends_on: [MGR-01]
+    duration_days: 2
+    deadline: {relative_to: join_date, offset_days: -2}
+    flags: {mandatory: true}
+  MGR-03:
+    title: Welcome meeting scheduled
+    owner_role: MANAGER
+    depends_on: [MGR-02]
+    duration_days: 0.5
+    deadline: {relative_to: join_date, offset_days: 0}
+  MGR-04:
+    title: 30-day check-in
+    owner_role: MANAGER
+    depends_on: [MGR-03]
+    duration_days: 0.5
+    deadline: {relative_to: join_date, offset_days: 30}

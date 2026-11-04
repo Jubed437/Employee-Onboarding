@@ -1,0 +1,17 @@
+playbooks:
+  - id: PB-REMIND
+    action_type: SEND_REMINDER
+    tier: AUTO
+    applies_when:
+      owner_role: [NEW_HIRE]
+      task_states: [REJECTED, IN_PROGRESS, READY]
+    effect:
+      reduce_remaining_days: 1
+  - id: PB-OFFCYCLE
+    action_type: OFFCYCLE_PAYROLL
+    tier: MANAGER_APPROVAL
+    applies_when:
+      outcome_tags: [FIRST_SALARY_AT_RISK]
+    effect:
+      extend_due_days: 5
+      target_task: PAY-06
