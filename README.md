@@ -1,1 +1,31 @@
-# Employee-Onboarding
+# Employee Onboarding Orchestrator
+
+An offline-first employee onboarding orchestration application built in stages from the [product requirements document](docs/PRD.md).
+
+## Local development
+
+Backend prerequisites: Python 3.12+.
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -e "backend[dev]"
+python -m uvicorn app.main:app --app-dir backend --reload
+```
+
+The API is available at `http://localhost:8000`, with a health check at `/health`.
+
+Install frontend dependencies and start Vite in a second terminal:
+
+```powershell
+npm --prefix frontend install
+npm --prefix frontend run dev
+```
+
+Run checks from the repository root:
+
+```powershell
+make test
+make lint
+make frontend-build
+```
