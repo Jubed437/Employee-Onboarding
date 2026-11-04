@@ -44,3 +44,6 @@ retrieval component rather than coupling vector storage to core onboarding table
 - Playbook recommendations are simulated and ranked deterministically. Their
   idempotency keys prevent duplicates; AUTO actions execute immediately, while
   approval tiers require the appropriate manager and/or HR approval records.
+- Readiness is a deterministic weighted score over critical completion, slack,
+  compliance, and timeliness. Each persisted snapshot includes its formula
+  components and task-level drivers for explainability.

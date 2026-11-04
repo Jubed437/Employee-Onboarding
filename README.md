@@ -35,6 +35,10 @@ actions are ranked by breach resolution, approval tier, and disruption, persiste
 idempotently, and auto-tier actions execute immediately. Approval-tier actions
 require the configured manager/HR approvals before their effects are applied.
 
+Readiness snapshots combine critical completion, projected slack, compliance, and
+timeliness using the configured weights and expose the component breakdown,
+band, and deterministic task drivers.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
