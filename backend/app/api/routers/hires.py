@@ -7,6 +7,7 @@ from app.core.clock import RealClock
 from app.db.base import Employee, ReadinessSnapshot
 from app.domain.api_schemas import HireCreate, HireResponse, ReadinessResponse
 from app.domain.enums import EmployeeStatus, Role
+from app.services.monitor import evaluate
 from app.services.plan_generator import generate_plan
 
 router = APIRouter(prefix="/hires", tags=["hires"])
@@ -44,6 +45,7 @@ def create_hire(
     session.add(employee)
     session.flush()
     generate_plan(session, employee, RealClock())
+    evaluate(session, employee.id, RealClock())
     return employee
 
 
