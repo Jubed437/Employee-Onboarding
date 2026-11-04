@@ -8,6 +8,7 @@ from app.core.clock import Clock
 from app.db.base import Recommendation, Risk, TaskInstance, new_id
 from app.domain.enums import ReasonCode, RecommendationStatus
 from app.domain.schemas import PlaybooksConfig, PoliciesConfig
+from app.llm.service import get_llm_service
 from app.services.impact import ImpactResult
 from app.services.playbooks import (
     matching_playbooks,
@@ -58,7 +59,13 @@ def recommend_for_risk(
                 "new_slack_days": match.new_slack_days,
             },
             rank=rank,
-            rationale=_rationale(match.playbook.id, match.new_slack_days),
+            rationale=get_llm_service().draft_message(
+                "recommendation",
+                {
+                    "playbook_id": match.playbook.id,
+                    "new_slack_days": match.new_slack_days,
+                },
+            ).body,
             status=RecommendationStatus.PROPOSED,
             idempotency_key=key,
             created_at=now,

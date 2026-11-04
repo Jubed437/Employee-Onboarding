@@ -1,0 +1,1 @@
+Extract only structured onboarding fields from the supplied document text.
