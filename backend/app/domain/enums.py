@@ -66,3 +66,23 @@ class RecommendationStatus(StrEnum):
     EXECUTED = "EXECUTED"
     FAILED = "FAILED"
     SUPERSEDED = "SUPERSEDED"
+
+
+class EmployeeStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+
+
+class NotificationChannel(StrEnum):
+    EMAIL = "EMAIL"
+    CHAT = "CHAT"
+
+
+class SimulationMode(StrEnum):
+    SIM = "SIM"
+    REAL = "REAL"
+
+
+class ApprovalDecision(StrEnum):
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
