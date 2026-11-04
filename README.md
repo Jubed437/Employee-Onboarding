@@ -18,6 +18,10 @@ Task transitions are enforced by a service-level state machine. Successful
 transitions append event and audit records, enforce actor permissions, and
 unlock dependent tasks when their prerequisites are complete.
 
+The API exposes demo persona login and JWT-protected hire and task operations
+under `/api/v1`. Set `JWT_SECRET` to a strong environment value outside local
+development; the built-in secret is for the synthetic demo only.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
