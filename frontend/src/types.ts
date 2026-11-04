@@ -110,3 +110,23 @@ export type Recommendation = {
   rationale: string;
   status: string;
 };
+
+export type TimelineEvent = {
+  id: string;
+  ts: string;
+  type?: string;
+  action?: string;
+  actor: string;
+  reason?: string | null;
+  payload?: Record<string, unknown>;
+};
+
+export type Notification = {
+  id: string;
+  ts: string;
+  employee_id: string;
+  to_role_or_user: string;
+  subject: string;
+  body: string;
+  status: string;
+};

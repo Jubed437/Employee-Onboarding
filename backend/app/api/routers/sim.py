@@ -1,12 +1,12 @@
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, require_roles
 from app.core.clock import SimClock
 from app.core.security import CurrentUser
-from app.db.base import Employee, TaskInstance
+from app.db.base import Employee, EventLog, TaskInstance
 from app.db.base import SimClock as SimClockRow
 from app.domain.enums import Role, TaskState
 from app.services.monitor import evaluate
@@ -66,4 +66,20 @@ def inject(
     row = session.get(SimClockRow, 1)
     if row is not None:
         evaluate(session, task.employee_id, SimClock(session))
+    return {"ok": True}
+
+
+@router.post("/reset")
+def reset(
+    session: Session = Depends(get_db),
+    _: CurrentUser = Depends(require_roles(Role.ADMIN)),
+) -> dict[str, bool]:
+    for model in (EventLog,):
+        session.execute(delete(model))
+    for task in session.scalars(select(TaskInstance)).all():
+        task.state = TaskState.READY if task.template_key == "HR-01" else TaskState.NOT_STARTED
+        task.meta = {}
+        task.attempts = 0
+        task.rework_count = 0
+    session.commit()
     return {"ok": True}

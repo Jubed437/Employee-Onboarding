@@ -65,3 +65,6 @@ retrieval component rather than coupling vector storage to core onboarding table
   Approval endpoints delegate authorization and audit behavior to the executor
   service; the graph view renders persisted task dependency edges without
   introducing a second graph model.
+- Admin telemetry reads the existing audit, event, and notification tables.
+  Simulation controls remain restricted to `ADMIN`, and the frontend exposes
+  their state in a collapsible dock without adding a separate simulation store.

@@ -58,6 +58,10 @@ filters, role-aware task drawer actions, owner queue, and new-hire checklist.
 Stage 14 adds open-risk and recommendation approval APIs, a dependency graph
 view, risk cards with root-cause/impact details, and manager/HR approval actions.
 
+Stage 15 adds admin-only config, audit, event, and notification endpoints,
+simulation advance/reset controls, and frontend simulation, timeline, and
+outbox views.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
