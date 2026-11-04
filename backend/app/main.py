@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.routers import auth, hires, sim, stream, tasks
+from app.api.routers import auth, hires, risk, sim, stream, tasks
 
 app = FastAPI(title="Onboarding Orchestrator", version="0.1.0")
 app.include_router(auth.router, prefix="/api/v1")
@@ -8,6 +8,7 @@ app.include_router(hires.router, prefix="/api/v1")
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(sim.router, prefix="/api/v1")
 app.include_router(stream.router, prefix="/api/v1")
+app.include_router(risk.router, prefix="/api/v1")
 
 
 @app.get("/health")

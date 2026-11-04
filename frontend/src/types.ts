@@ -86,3 +86,27 @@ export type Plan = {
   tasks: Task[];
   edges: { from: string; to: string }[];
 };
+
+export type Risk = {
+  id: string;
+  task_id: string;
+  level: "MEDIUM" | "HIGH";
+  reason_codes: string[];
+  predicted_breach_date: string;
+  slack_days: number;
+  root_cause_task_id: string | null;
+  impact: { chain?: string[]; outcome_tags?: string[]; has_critical_task?: boolean };
+  status: string;
+};
+
+export type Recommendation = {
+  id: string;
+  risk_id: string;
+  playbook_id: string;
+  action_type: string;
+  tier: string;
+  simulated_outcome: { resolves_breach?: boolean; new_slack_days?: number };
+  rank: number;
+  rationale: string;
+  status: string;
+};

@@ -8,6 +8,8 @@ import type {
   Plan,
   Task,
   TaskState,
+  Recommendation,
+  Risk,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
@@ -47,6 +49,13 @@ export const api = {
     request<Task>(`/tasks/${taskId}/transition`, {
       method: "POST",
       body: JSON.stringify({ to, reason }),
+    }),
+  risks: (hireId: string) => request<Risk[]>(`/hires/${hireId}/risks`),
+  recommendations: () => request<Recommendation[]>("/recommendations"),
+  decideRecommendation: (id: string, decision: "approve" | "reject", comment?: string) =>
+    request<Recommendation>(`/recommendations/${id}/${decision}`, {
+      method: "POST",
+      body: JSON.stringify({ comment }),
     }),
   streamUrl: (hireId?: string) =>
     `${API_BASE}/stream${hireId ? `?hire_id=${encodeURIComponent(hireId)}` : ""}`,
