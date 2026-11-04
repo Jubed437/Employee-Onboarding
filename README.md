@@ -72,6 +72,11 @@ Stage 17 adds the hardening and evaluation suite in
 [docs/evaluation.md](docs/evaluation.md), edge-case tests, CORS support for
 the local frontend, and a Playwright Scenario A smoke test.
 
+Stage 18 adds the timed [demo runbook](docs/demo-script.md), [presenter
+notes](docs/presenter-notes.md), and a one-command `make demo-reset` that
+recreates the SQLite schema and reseeds synthetic demo data. Backup recordings
+should remain outside Git.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
@@ -97,6 +102,7 @@ Run checks from the repository root:
 
 ```powershell
 make test
+make demo-reset
 make lint
 make frontend-build
 make frontend-e2e
