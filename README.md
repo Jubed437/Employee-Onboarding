@@ -43,6 +43,11 @@ Stage 10 adds the synchronous monitor boundary, simulation endpoints
 (`/api/v1/sim/*`), a notification outbox mock, and an authenticated SSE stream
 at `/api/v1/stream`. Seed the synthetic demo data with `make seed`.
 
+The Stage 11 frontend provides a responsive app shell with synthetic persona
+login, persisted JWT auth, role-filtered navigation, simulated-time status,
+SSE connectivity, and reusable status, score, progress, loading, empty, and
+error components.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
