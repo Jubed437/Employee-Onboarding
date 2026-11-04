@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -52,6 +52,18 @@ class HireResponse(BaseModel):
     email: str
     join_date: date
     profile_key: str
+
+
+class ReadinessResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    employee_id: str
+    ts: datetime
+    score: int
+    band: str
+    breakdown: dict[str, float]
+    drivers: list[str]
 
 
 class TransitionRequest(BaseModel):

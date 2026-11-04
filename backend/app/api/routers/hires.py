@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, require_roles
 from app.core.clock import RealClock
-from app.db.base import Employee
-from app.domain.api_schemas import HireCreate, HireResponse
+from app.db.base import Employee, ReadinessSnapshot
+from app.domain.api_schemas import HireCreate, HireResponse, ReadinessResponse
 from app.domain.enums import EmployeeStatus, Role
 from app.services.plan_generator import generate_plan
 
@@ -55,10 +55,42 @@ def get_hire(
 ) -> Employee:
     employee = session.get(Employee, hire_id)
     if employee is None:
-        from fastapi import HTTPException
-
         raise HTTPException(
             status_code=404,
             detail={"code": "NOT_FOUND", "message": "Hire not found"},
         )
     return employee
+
+
+@router.get("/{hire_id}/readiness", response_model=ReadinessResponse)
+def get_readiness(
+    hire_id: str,
+    session: Session = Depends(get_db),
+    _: object = Depends(require_roles(Role.ADMIN, Role.HR, Role.MANAGER)),
+) -> ReadinessSnapshot:
+    snapshot = session.scalar(
+        select(ReadinessSnapshot)
+        .where(ReadinessSnapshot.employee_id == hire_id)
+        .order_by(ReadinessSnapshot.ts.desc())
+    )
+    if snapshot is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "NOT_FOUND", "message": "Readiness snapshot not found"},
+        )
+    return snapshot
+
+
+@router.get("/{hire_id}/readiness/history", response_model=list[ReadinessResponse])
+def readiness_history(
+    hire_id: str,
+    session: Session = Depends(get_db),
+    _: object = Depends(require_roles(Role.ADMIN, Role.HR, Role.MANAGER)),
+) -> list[ReadinessSnapshot]:
+    return list(
+        session.scalars(
+            select(ReadinessSnapshot)
+            .where(ReadinessSnapshot.employee_id == hire_id)
+            .order_by(ReadinessSnapshot.ts)
+        )
+    )

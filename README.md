@@ -48,6 +48,10 @@ login, persisted JWT auth, role-filtered navigation, simulated-time status,
 SSE connectivity, and reusable status, score, progress, loading, empty, and
 error components.
 
+Stage 12 adds the active-hires table, validated new-hire form, readiness
+snapshot endpoints, and a hire Overview with score band, formula breakdown,
+and deterministic readiness drivers.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
