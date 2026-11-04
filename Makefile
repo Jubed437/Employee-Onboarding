@@ -1,4 +1,4 @@
-.PHONY: dev db-upgrade seed backend-test backend-lint frontend-build frontend-lint frontend-e2e test lint
+.PHONY: dev db-upgrade seed demo-reset backend-test backend-lint frontend-build frontend-lint frontend-e2e test lint
 
 dev:
 	python -m uvicorn app.main:app --app-dir backend --reload
@@ -8,6 +8,9 @@ db-upgrade:
 
 seed:
 	python backend/seed.py
+
+demo-reset:
+	python backend/demo_reset.py
 
 backend-test:
 	python -m pytest backend/tests

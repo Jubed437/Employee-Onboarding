@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import { api } from "./api";
@@ -241,7 +241,70 @@ function GraphView({ hire }: { hire: Hire }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [edges, setEdges] = useState<{ from: string; to: string }[]>([]);
   useEffect(() => { api.plan(hire.id).then((plan) => { setTasks(plan.tasks); setEdges(plan.edges); }); }, [hire.id]);
-  return <section><p className="eyebrow">Dependency graph</p><h2>Onboarding flow</h2><div className="graph-legend"><span>● Ready</span><span>● In progress</span><span>● Done</span><span>● Blocked</span></div><div className="graph-board">{tasks.map((task) => <div className={`graph-node node-${task.state.toLowerCase()}`} key={task.id}><strong>{task.template_key}</strong><small>{task.title}</small><em>{task.state.replace("_", " ")}</em></div>)}{edges.length > 0 && <p className="graph-edges">{edges.length} dependency connections</p>}</div></section>;
+  const layout = useMemo(() => {
+    const incoming = new Map(tasks.map((task) => [task.id, [] as string[]]));
+    edges.forEach(({ from, to }) => {
+      incoming.get(to)?.push(from);
+    });
+    const levels = new Map<string, number>();
+    function level(taskId: string, trail = new Set<string>()): number {
+      const current = levels.get(taskId);
+      if (current !== undefined) return current;
+      if (trail.has(taskId)) return 0;
+      const parents = incoming.get(taskId) ?? [];
+      const next = parents.length === 0
+        ? 0
+        : Math.max(...parents.map((parent) => level(parent, new Set(trail).add(taskId)) + 1));
+      levels.set(taskId, next);
+      return next;
+    }
+    tasks.forEach((task) => level(task.id));
+    const rows = new Map<number, number>();
+    const positions = new Map<string, { x: number; y: number }>();
+    tasks.forEach((task) => {
+      const column = levels.get(task.id) ?? 0;
+      const row = rows.get(column) ?? 0;
+      rows.set(column, row + 1);
+      positions.set(task.id, { x: column * 250 + 20, y: row * 135 + 20 });
+    });
+    const columns = Math.max(1, ...Array.from(levels.values())) + 1;
+    const height = Math.max(220, ...Array.from(rows.values()).map((row) => row * 135 + 20));
+    return { height, width: columns * 250, positions };
+  }, [tasks, edges]);
+  return (
+    <section>
+      <p className="eyebrow">Dependency graph</p>
+      <h2>Onboarding flow</h2>
+      <div className="graph-legend">
+        <span>● Ready</span><span>● In progress</span><span>● Done</span><span>● Blocked</span>
+        <span className="graph-direction">Arrow direction: prerequisite → dependent task</span>
+      </div>
+      <div className="graph-board">
+        {tasks.length === 0 ? <EmptyState title="No graph data">This hire has no generated tasks.</EmptyState> : (
+          <div className="graph-canvas" style={{ height: layout.height, minWidth: layout.width }}>
+            <svg className="graph-lines" width={layout.width} height={layout.height} aria-label={`${edges.length} dependency connections`}>
+              <defs>
+                <marker id="graph-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" />
+                </marker>
+              </defs>
+              {edges.map(({ from, to }) => {
+                const source = layout.positions.get(from);
+                const target = layout.positions.get(to);
+                if (!source || !target) return null;
+                return <path className="graph-line" key={`${from}-${to}`} d={`M ${source.x + 190} ${source.y + 52} C ${source.x + 225} ${source.y + 52}, ${target.x - 35} ${target.y + 52}, ${target.x} ${target.y + 52}`} markerEnd="url(#graph-arrow)" />;
+              })}
+            </svg>
+            {tasks.map((task) => {
+              const position = layout.positions.get(task.id) ?? { x: 20, y: 20 };
+              return <div className={`graph-node node-${task.state.toLowerCase()}`} style={{ left: position.x, top: position.y }} key={task.id}><strong>{task.template_key}</strong><small>{task.title}</small><em>{task.state.replace("_", " ")}</em></div>;
+            })}
+          </div>
+        )}
+      </div>
+      <p className="graph-edges">{edges.length} dependency connections</p>
+    </section>
+  );
 }
 
 function NewHireView() {

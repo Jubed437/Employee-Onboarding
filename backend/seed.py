@@ -8,6 +8,7 @@ from app.db.base import Base, Employee, User
 from app.db.base import SimClock as SimClockRow
 from app.db.session import DATABASE_URL
 from app.domain.enums import EmployeeStatus, Role, SimulationMode
+from app.services.monitor import evaluate
 from app.services.plan_generator import generate_plan
 
 
@@ -85,6 +86,8 @@ def seed() -> None:
                 session.flush()
                 generate_plan(session, employee, SimClock(session))
         session.commit()
+        for employee_id, *_ in hires:
+            evaluate(session, employee_id, SimClock(session))
 
 
 if __name__ == "__main__":
