@@ -26,6 +26,10 @@ Risk evaluation is deterministic and configuration-driven: open tasks receive
 earliest-finish and slack calculations, with explicit reasons for overdue work,
 upstream delay, rework, owner overload, external SLAs, and critical gates.
 
+Root-cause analysis identifies the highest-priority blocked or rejected task
+frontier and returns its dependency chain. Downstream impact analysis traverses
+dependent tasks and summarizes affected projected outcomes and outcome tags.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
