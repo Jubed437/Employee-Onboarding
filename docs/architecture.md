@@ -41,3 +41,6 @@ retrieval component rather than coupling vector storage to core onboarding table
   rejected tasks over blocked tasks when projected finish times tie. Impact
   analysis traverses descendants through dependency edges and aggregates
   projected finish dates and outcome tags.
+- Playbook recommendations are simulated and ranked deterministically. Their
+  idempotency keys prevent duplicates; AUTO actions execute immediately, while
+  approval tiers require the appropriate manager and/or HR approval records.
