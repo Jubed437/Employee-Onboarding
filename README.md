@@ -14,6 +14,10 @@ Plan generation is configuration-driven: employee profile variants produce a
 deterministic task graph, business-day due dates, dependency rows, and initial
 task states. Re-running generation for an employee is idempotent.
 
+Task transitions are enforced by a service-level state machine. Successful
+transitions append event and audit records, enforce actor permissions, and
+unlock dependent tasks when their prerequisites are complete.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
