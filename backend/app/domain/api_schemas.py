@@ -42,6 +42,19 @@ class TaskResponse(BaseModel):
     title: str
     state: TaskState
     due_date: date
+    owner_role: Role
+    assignee_user_id: str | None = None
+    duration_days: float
+    is_critical: bool
+    is_mandatory: bool
+    is_compliance: bool
+    outcome_tags: list[str]
+    meta: dict[str, object]
+
+
+class PlanResponse(BaseModel):
+    tasks: list[TaskResponse]
+    edges: list[dict[str, str]]
 
 
 class HireResponse(BaseModel):

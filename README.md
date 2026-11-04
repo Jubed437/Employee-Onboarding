@@ -52,6 +52,9 @@ Stage 12 adds the active-hires table, validated new-hire form, readiness
 snapshot endpoints, and a hire Overview with score band, formula breakdown,
 and deterministic readiness drivers.
 
+Stage 13 adds plan and owner-queue APIs plus the frontend task plan, state
+filters, role-aware task drawer actions, owner queue, and new-hire checklist.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.

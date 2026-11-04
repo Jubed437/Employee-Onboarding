@@ -5,6 +5,9 @@ import type {
   Persona,
   Readiness,
   SimulationClock,
+  Plan,
+  Task,
+  TaskState,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
@@ -37,6 +40,14 @@ export const api = {
   createHire: (hire: HireCreate) =>
     request<Hire>("/hires", { method: "POST", body: JSON.stringify(hire) }),
   readiness: (hireId: string) => request<Readiness>(`/hires/${hireId}/readiness`),
+  plan: (hireId: string) => request<Plan>(`/tasks/plans/${hireId}`),
+  myTasks: (state?: TaskState) =>
+    request<Task[]>(`/tasks/mine${state ? `?state=${state}` : ""}`),
+  transitionTask: (taskId: string, to: TaskState, reason?: string) =>
+    request<Task>(`/tasks/${taskId}/transition`, {
+      method: "POST",
+      body: JSON.stringify({ to, reason }),
+    }),
   streamUrl: (hireId?: string) =>
     `${API_BASE}/stream${hireId ? `?hire_id=${encodeURIComponent(hireId)}` : ""}`,
 };
