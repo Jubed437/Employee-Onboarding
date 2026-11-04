@@ -1,4 +1,11 @@
-import type { LoginResponse, Persona, SimulationClock } from "./types";
+import type {
+  Hire,
+  HireCreate,
+  LoginResponse,
+  Persona,
+  Readiness,
+  SimulationClock,
+} from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
 
@@ -26,6 +33,10 @@ export const api = {
       body: JSON.stringify({ user_id: userId }),
     }),
   clock: () => request<SimulationClock>("/sim/clock"),
+  listHires: () => request<Hire[]>("/hires"),
+  createHire: (hire: HireCreate) =>
+    request<Hire>("/hires", { method: "POST", body: JSON.stringify(hire) }),
+  readiness: (hireId: string) => request<Readiness>(`/hires/${hireId}/readiness`),
   streamUrl: (hireId?: string) =>
     `${API_BASE}/stream${hireId ? `?hire_id=${encodeURIComponent(hireId)}` : ""}`,
 };

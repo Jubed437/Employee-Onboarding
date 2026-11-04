@@ -55,3 +55,6 @@ retrieval component rather than coupling vector storage to core onboarding table
   authentication. Role-filtered navigation is derived from the authenticated
   persona, while the SSE hook provides live-connection state for later query
   invalidation.
+- Hire Overview data is served through typed readiness snapshot endpoints. The
+  create flow continues to use the backend plan generator, so new hires receive
+  the same deterministic plan as API-created employees.
