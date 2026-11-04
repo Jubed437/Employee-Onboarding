@@ -10,6 +10,10 @@ and vector search are deliberately deferred until a measured semantic-search
 requirement exists. See the [architecture overview](docs/architecture.md) and
 [ADR-001](docs/decisions/ADR-001-mvp-storage-and-search.md).
 
+Plan generation is configuration-driven: employee profile variants produce a
+deterministic task graph, business-day due dates, dependency rows, and initial
+task states. Re-running generation for an employee is idempotent.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
