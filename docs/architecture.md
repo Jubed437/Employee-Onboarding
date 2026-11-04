@@ -61,3 +61,7 @@ retrieval component rather than coupling vector storage to core onboarding table
 - Task plans are exposed with dependency edges, while `/tasks/mine` scopes
   queues by owner role. Frontend task transitions call the existing audited
   state machine rather than duplicating workflow rules in components.
+- Risks and recommendations are served from the monitor's persisted records.
+  Approval endpoints delegate authorization and audit behavior to the executor
+  service; the graph view renders persisted task dependency edges without
+  introducing a second graph model.

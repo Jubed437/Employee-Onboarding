@@ -91,6 +91,23 @@ nav { display: grid; gap: 5px; }
 .checklist-item:last-child { border-bottom: 0; }
 .check-icon { color: var(--muted); font-size: 1.4rem; }
 .check-icon.checked { color: var(--green); }
+.risk-list, .approval-list { display: grid; gap: 14px; max-width: 860px; }
+.risk-card, .approval-card { padding: 20px; background: white; border: 1px solid var(--line); border-left: 4px solid var(--amber); border-radius: 12px; }
+.risk-high { border-left-color: #c94b4b; }
+.risk-card h3, .approval-card h3 { margin: 10px 0 0; }
+.risk-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.risk-card-heading > strong { color: #b04d35; }
+.impact-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.impact-tags span { padding: 5px 8px; color: var(--blue); background: var(--blue-soft); border-radius: 6px; font-size: .72rem; font-weight: 700; }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 18px 0; color: var(--muted); font-size: .8rem; }
+.graph-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; min-height: 360px; padding: 24px; background: #f8f9fc; border: 1px solid var(--line); border-radius: 12px; }
+.graph-node { display: grid; gap: 7px; align-content: start; min-height: 105px; padding: 14px; background: white; border: 2px solid #cbd2df; border-radius: 10px; box-shadow: 0 5px 12px #1720330b; }
+.graph-node small { color: var(--muted); line-height: 1.3; }
+.graph-node em { color: var(--muted); font-size: .68rem; font-style: normal; font-weight: 800; text-transform: uppercase; }
+.node-in_progress { border-color: var(--blue); }
+.node-done { border-color: var(--green); }
+.node-blocked, .node-rejected { border-color: var(--amber); }
+.graph-edges { grid-column: 1 / -1; color: var(--muted); font-size: .8rem; }
 .hire-table { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 12px; }
 .hire-table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr; gap: 18px; align-items: center; padding: 17px 20px; border-bottom: 1px solid var(--line); }
 .hire-table-row:last-child { border-bottom: 0; }

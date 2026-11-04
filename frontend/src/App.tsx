@@ -14,6 +14,8 @@ import type {
   Role,
   Task,
   TaskState,
+  Risk,
+  Recommendation,
 } from "./types";
 
 const navigation: Record<Role, string[]> = {
@@ -144,7 +146,7 @@ function CreateHire({ onCreated, onCancel }: { onCreated: (hire: Hire) => void; 
   );
 }
 
-function HireOverview({ hire, onBack, onPlan }: { hire: Hire; onBack: () => void; onPlan: () => void }) {
+function HireOverview({ hire, onBack, onPlan, onRisks, onGraph }: { hire: Hire; onBack: () => void; onPlan: () => void; onRisks: () => void; onGraph: () => void }) {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -156,7 +158,7 @@ function HireOverview({ hire, onBack, onPlan }: { hire: Hire; onBack: () => void
       <div className="section-heading">
         <div><p className="eyebrow">Hire overview</p><h2>{hire.full_name}</h2><p className="muted">{hire.email} · Joining {formatDate(hire.join_date)}</p></div>
         <div className="heading-actions">
-          <button className="secondary-button" onClick={onPlan}>View plan</button>
+          <div className="heading-actions"><button className="secondary-button" onClick={onPlan}>Plan</button><button className="secondary-button" onClick={onRisks}>Risks</button><button className="secondary-button" onClick={onGraph}>Graph</button></div>
           {readiness && <StatusBadge label={readiness.band.replace("_", " ")} tone={readiness.band === "READY" ? "good" : "warning"} />}
         </div>
       </div>
@@ -216,6 +218,30 @@ function QueueView() {
   return <section><div className="section-heading"><div><p className="eyebrow">Owner queue</p><h2>Tasks assigned to your role</h2></div></div>{error && <ErrorState message={error} />}{tasks.length === 0 && !error ? <EmptyState title="Queue is clear">No tasks are currently assigned to you.</EmptyState> : <div className="task-table">{tasks.map((task) => <div className="task-row" key={task.id}><span className="task-key">{task.template_key}</span><span><strong>{task.title}</strong></span><span>{task.owner_role}</span><span>{formatDate(task.due_date)}</span><StatusBadge label={task.state.replace("_", " ")} tone={stateTone(task.state)} /></div>)}</div>}</section>;
 }
 
+function RisksView({ hire }: { hire: Hire }) {
+  const [risks, setRisks] = useState<Risk[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { api.risks(hire.id).then(setRisks).catch(() => setError("Could not load risks")); }, [hire.id]);
+  return <section><p className="eyebrow">Risk monitor</p><h2>{hire.full_name} risks</h2>{error && <ErrorState message={error} />}{risks.length === 0 && !error ? <EmptyState title="No open risks">This onboarding plan is currently on track.</EmptyState> : <div className="risk-list">{risks.map((risk) => <article className={`risk-card risk-${risk.level.toLowerCase()}`} key={risk.id}><div className="risk-card-heading"><div><StatusBadge label={risk.level} tone="warning" /><h3>Task {risk.task_id}</h3></div><strong>{risk.slack_days} days slack</strong></div><p className="muted">Predicted breach: {formatDate(risk.predicted_breach_date)}</p><p>Reasons: {risk.reason_codes.join(", ") || "Schedule pressure"}</p>{risk.root_cause_task_id && <p><strong>Root cause:</strong> {risk.root_cause_task_id}</p>}<div className="impact-tags">{(risk.impact.outcome_tags ?? []).map((tag) => <span key={tag}>{tag}</span>)}</div></article>)}</div>}</section>;
+}
+
+function ApprovalsView() {
+  const [items, setItems] = useState<Recommendation[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { api.recommendations().then(setItems).catch(() => setError("Could not load approvals")); }, []);
+  async function decide(id: string, decision: "approve" | "reject") {
+    try { await api.decideRecommendation(id, decision); setItems((current) => current.filter((item) => item.id !== id)); } catch { setError("Approval could not be recorded"); }
+  }
+  return <section><p className="eyebrow">Governance</p><h2>Pending approvals</h2>{error && <ErrorState message={error} />}{items.length === 0 && !error ? <EmptyState title="No pending approvals">Recommendations needing your decision will appear here.</EmptyState> : <div className="approval-list">{items.map((item) => <article className="approval-card" key={item.id}><div className="risk-card-heading"><div><StatusBadge label={item.tier.replaceAll("_", " ")} tone="neutral" /><h3>{item.action_type.replaceAll("_", " ")}</h3></div><span>Rank {item.rank}</span></div><p>{item.rationale}</p><p className="muted">Simulated slack: {item.simulated_outcome.new_slack_days ?? "—"} days · {item.simulated_outcome.resolves_breach ? "Resolves breach" : "Does not fully resolve"}</p><div className="drawer-actions"><button className="primary-button compact-button" onClick={() => decide(item.id, "approve")}>Approve</button><button className="secondary-button" onClick={() => decide(item.id, "reject")}>Reject</button></div></article>)}</div>}</section>;
+}
+
+function GraphView({ hire }: { hire: Hire }) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [edges, setEdges] = useState<{ from: string; to: string }[]>([]);
+  useEffect(() => { api.plan(hire.id).then((plan) => { setTasks(plan.tasks); setEdges(plan.edges); }); }, [hire.id]);
+  return <section><p className="eyebrow">Dependency graph</p><h2>Onboarding flow</h2><div className="graph-legend"><span>● Ready</span><span>● In progress</span><span>● Done</span><span>● Blocked</span></div><div className="graph-board">{tasks.map((task) => <div className={`graph-node node-${task.state.toLowerCase()}`} key={task.id}><strong>{task.template_key}</strong><small>{task.title}</small><em>{task.state.replace("_", " ")}</em></div>)}{edges.length > 0 && <p className="graph-edges">{edges.length} dependency connections</p>}</div></section>;
+}
+
 function NewHireView() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -251,7 +277,7 @@ function Shell() {
   const connected = useOnboardingStream();
   const [active, setActive] = useState(navigation[user?.role ?? "ADMIN"][0]);
   const [selectedHire, setSelectedHire] = useState<Hire | null>(null);
-  const [showPlan, setShowPlan] = useState(false);
+  const [detailView, setDetailView] = useState<"overview" | "plan" | "risks" | "graph">("overview");
   if (!user) return <LoginScreen />;
   const items = navigation[user.role];
   return (
@@ -264,7 +290,7 @@ function Shell() {
             <button
               className={active === item ? "nav-item active" : "nav-item"}
               key={item}
-              onClick={() => { setActive(item); setSelectedHire(null); setShowPlan(false); }}
+              onClick={() => { setActive(item); setSelectedHire(null); setDetailView("overview"); }}
             >
               {item}
             </button>
@@ -293,8 +319,10 @@ function Shell() {
             <NewHireView />
           ) : active === "My queue" ? (
             <QueueView />
+          ) : active === "Approvals" ? (
+            <ApprovalsView />
           ) : active === "My hires" || active === "Command center" ? (
-            selectedHire ? (showPlan ? <PlanView hire={selectedHire} onBack={() => setShowPlan(false)} /> : <HireOverview hire={selectedHire} onBack={() => setSelectedHire(null)} onPlan={() => setShowPlan(true)} />) :
+            selectedHire ? (detailView === "plan" ? <PlanView hire={selectedHire} onBack={() => setDetailView("overview")} /> : detailView === "risks" ? <RisksView hire={selectedHire} /> : detailView === "graph" ? <GraphView hire={selectedHire} /> : <HireOverview hire={selectedHire} onBack={() => setSelectedHire(null)} onPlan={() => setDetailView("plan")} onRisks={() => setDetailView("risks")} onGraph={() => setDetailView("graph")} />) :
             <HiresDashboard onSelect={setSelectedHire} onNew={() => setActive("New hire")} />
           ) : active === "New hire" ? (
             <CreateHire onCreated={(hire) => { setSelectedHire(hire); setActive(user.role === "ADMIN" ? "Command center" : "My hires"); }} onCancel={() => setActive("My hires")} />

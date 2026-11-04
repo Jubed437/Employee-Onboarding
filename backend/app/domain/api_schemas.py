@@ -57,6 +57,34 @@ class PlanResponse(BaseModel):
     edges: list[dict[str, str]]
 
 
+class RiskResponse(BaseModel):
+    id: str
+    task_id: str
+    level: str
+    reason_codes: list[str]
+    predicted_breach_date: date
+    slack_days: float
+    root_cause_task_id: str | None
+    impact: dict[str, object]
+    status: str
+
+
+class RecommendationResponse(BaseModel):
+    id: str
+    risk_id: str
+    playbook_id: str
+    action_type: str
+    tier: str
+    simulated_outcome: dict[str, object]
+    rank: int
+    rationale: str
+    status: str
+
+
+class ApprovalRequest(BaseModel):
+    comment: str | None = None
+
+
 class HireResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

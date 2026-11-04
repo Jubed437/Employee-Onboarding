@@ -55,6 +55,9 @@ and deterministic readiness drivers.
 Stage 13 adds plan and owner-queue APIs plus the frontend task plan, state
 filters, role-aware task drawer actions, owner queue, and new-hire checklist.
 
+Stage 14 adds open-risk and recommendation approval APIs, a dependency graph
+view, risk cards with root-cause/impact details, and manager/HR approval actions.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
