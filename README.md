@@ -22,6 +22,10 @@ The API exposes demo persona login and JWT-protected hire and task operations
 under `/api/v1`. Set `JWT_SECRET` to a strong environment value outside local
 development; the built-in secret is for the synthetic demo only.
 
+Risk evaluation is deterministic and configuration-driven: open tasks receive
+earliest-finish and slack calculations, with explicit reasons for overdue work,
+upstream delay, rework, owner overload, external SLAs, and critical gates.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
