@@ -51,3 +51,7 @@ retrieval component rather than coupling vector storage to core onboarding table
   for the SSE stream. Integration calls use database-backed mocks; notifications
   are written to the outbox without external network access. `make seed` creates
   the three synthetic demo hires and initializes simulated time.
+- The frontend uses a small typed API client and React context for demo
+  authentication. Role-filtered navigation is derived from the authenticated
+  persona, while the SSE hook provides live-connection state for later query
+  invalidation.
