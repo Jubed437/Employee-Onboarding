@@ -62,6 +62,12 @@ Stage 15 adds admin-only config, audit, event, and notification endpoints,
 simulation advance/reset controls, and frontend simulation, timeline, and
 outbox views.
 
+Stage 16 adds an optional provider-agnostic LLM boundary. It is disabled by
+default (`LLM_ENABLED=false`), redacts sensitive identifiers before provider
+calls, validates provider output, caches successful results by input hash, and
+falls back to deterministic templates after a retry. The hire assistant is
+available at `POST /api/v1/hires/{hire_id}/assistant`.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.

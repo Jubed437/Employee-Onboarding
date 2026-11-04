@@ -68,3 +68,7 @@ retrieval component rather than coupling vector storage to core onboarding table
 - Admin telemetry reads the existing audit, event, and notification tables.
   Simulation controls remain restricted to `ADMIN`, and the frontend exposes
   their state in a collapsible dock without adding a separate simulation store.
+- Optional LLM operations use `LLMService`. Inputs are redacted before the
+  provider boundary, outputs are validated with Pydantic, successful results
+  are cached by SHA-256 input hash, and one retry precedes deterministic
+  fallback templates. The default disabled mode never invokes a provider.
