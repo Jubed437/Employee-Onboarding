@@ -12,7 +12,8 @@ results later, but it does not decide compliance, approvals, scores, or dates.
 - **Database:** SQLite for the MVP, with PostgreSQL-compatible relational models so
   the persistence layer can be migrated without changing domain behaviour.
 - **Task graph:** relational task/dependency tables with `networkx` for graph
-  calculations. Risk, impact, and readiness calculations remain deterministic.
+  calculations. Risk, root-cause, impact, and readiness calculations remain
+  deterministic.
 - **Configuration:** YAML validated at startup with Pydantic. Adding a profile or
   playbook should not require application code changes.
 - **Frontend:** React 18, TypeScript strict mode, and Vite.
@@ -36,3 +37,7 @@ retrieval component rather than coupling vector storage to core onboarding table
 - The application must work with LLM features disabled.
 - All business time comes from the clock service, not direct system-clock calls.
 - SQLite is a local/demo choice, not a production deployment recommendation.
+- Root-cause analysis selects deterministic frontier candidates, preferring
+  rejected tasks over blocked tasks when projected finish times tie. Impact
+  analysis traverses descendants through dependency edges and aggregates
+  projected finish dates and outcome tags.
