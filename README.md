@@ -39,6 +39,10 @@ Readiness snapshots combine critical completion, projected slack, compliance, an
 timeliness using the configured weights and expose the component breakdown,
 band, and deterministic task drivers.
 
+Stage 10 adds the synchronous monitor boundary, simulation endpoints
+(`/api/v1/sim/*`), a notification outbox mock, and an authenticated SSE stream
+at `/api/v1/stream`. Seed the synthetic demo data with `make seed`.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
