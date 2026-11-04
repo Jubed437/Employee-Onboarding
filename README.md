@@ -68,6 +68,10 @@ calls, validates provider output, caches successful results by input hash, and
 falls back to deterministic templates after a retry. The hire assistant is
 available at `POST /api/v1/hires/{hire_id}/assistant`.
 
+Stage 17 adds the hardening and evaluation suite in
+[docs/evaluation.md](docs/evaluation.md), edge-case tests, CORS support for
+the local frontend, and a Playwright Scenario A smoke test.
+
 ## Local development
 
 Backend prerequisites: Python 3.12+.
@@ -95,5 +99,6 @@ Run checks from the repository root:
 make test
 make lint
 make frontend-build
+make frontend-e2e
 make db-upgrade
 ```

@@ -1,4 +1,4 @@
-.PHONY: dev db-upgrade seed backend-test backend-lint frontend-build frontend-lint test lint
+.PHONY: dev db-upgrade seed backend-test backend-lint frontend-build frontend-lint frontend-e2e test lint
 
 dev:
 	python -m uvicorn app.main:app --app-dir backend --reload
@@ -21,6 +21,9 @@ frontend-build:
 
 frontend-lint:
 	npm --prefix frontend run lint
+
+frontend-e2e:
+	npm --prefix frontend run e2e
 
 test: backend-test
 

@@ -72,3 +72,6 @@ retrieval component rather than coupling vector storage to core onboarding table
   provider boundary, outputs are validated with Pydantic, successful results
   are cached by SHA-256 input hash, and one retry precedes deterministic
   fallback templates. The default disabled mode never invokes a provider.
+- The Stage 17 evaluation matrix is maintained in `docs/evaluation.md`.
+  Browser coverage uses Playwright against the local Vite and FastAPI servers;
+  the API explicitly allows only the documented local development origins.
