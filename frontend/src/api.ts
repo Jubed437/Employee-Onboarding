@@ -10,6 +10,8 @@ import type {
   TaskState,
   Recommendation,
   Risk,
+  Notification,
+  TimelineEvent,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api/v1";
@@ -57,6 +59,22 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ comment }),
     }),
+  advanceClock: (days: number, hours = 0) =>
+    request<{ now: string }>("/sim/clock/advance", {
+      method: "POST",
+      body: JSON.stringify({ days, hours }),
+    }),
+  inject: (payload: Record<string, string>) =>
+    request<{ ok: boolean }>("/sim/inject", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  reset: () => request<{ ok: boolean }>("/sim/reset", { method: "POST" }),
+  config: () => request<Record<string, unknown>>("/config"),
+  audit: () => request<TimelineEvent[]>("/audit"),
+  events: (hireId: string) => request<TimelineEvent[]>(`/hires/${hireId}/events`),
+  notifications: (hireId?: string) =>
+    request<Notification[]>(`/notifications${hireId ? `?hire_id=${hireId}` : ""}`),
   streamUrl: (hireId?: string) =>
     `${API_BASE}/stream${hireId ? `?hire_id=${encodeURIComponent(hireId)}` : ""}`,
 };

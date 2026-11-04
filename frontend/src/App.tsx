@@ -16,6 +16,8 @@ import type {
   TaskState,
   Risk,
   Recommendation,
+  TimelineEvent,
+  Notification,
 } from "./types";
 
 const navigation: Record<Role, string[]> = {
@@ -252,6 +254,24 @@ function NewHireView() {
   return <section><p className="eyebrow">Your onboarding</p><h2>Your checklist</h2><p className="muted">Complete each step to keep your first day on track.</p>{error && <ErrorState message={error} />}{tasks.length > 0 && <><div className="checklist-progress"><strong>{completed} of {tasks.length} complete</strong><span className="mini-bar"><i style={{ width: `${(completed / tasks.length) * 100}%` }} /></span></div><div className="checklist">{tasks.map((task) => <div className="checklist-item" key={task.id}><span className={`check-icon ${task.state === "DONE" ? "checked" : ""}`}>{task.state === "DONE" ? "✓" : "○"}</span><div><strong>{task.title}</strong><small>{task.state.replace("_", " ")} · Due {formatDate(task.due_date)}</small></div></div>)}</div></>}</section>;
 }
 
+function AdminView({ mode }: { mode: "Simulation" | "Audit" }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  async function advance(days: number) {
+    try { await api.advanceClock(days); setMessage(`Advanced simulation by ${days} day${days === 1 ? "" : "s"}`); } catch { setMessage("Simulation action failed"); }
+  }
+  async function reset() {
+    try { await api.reset(); setMessage("Scenario reset"); } catch { setMessage("Reset failed"); }
+  }
+  useEffect(() => {
+    api.audit().then(setEvents).catch(() => setMessage("Could not load audit log"));
+    api.notifications().then(setNotifications).catch(() => setMessage("Could not load outbox"));
+  }, []);
+  return <section><div className="section-heading"><div><p className="eyebrow">Admin controls</p><h2>{mode}</h2></div><StatusBadge label="ADMIN ONLY" tone="neutral" /></div>{message && <p className="success-message">{message}</p>}{mode === "Simulation" ? <div className={`sim-dock ${collapsed ? "collapsed" : ""}`}><button className="dock-toggle" onClick={() => setCollapsed((value) => !value)}>{collapsed ? "Expand simulation dock" : "Collapse simulation dock"}</button>{!collapsed && <><p className="muted">Control simulated time and replay a deterministic scenario without external integrations.</p><div className="sim-actions"><button className="primary-button compact-button" onClick={() => advance(1)}>+1 day</button><button className="secondary-button" onClick={() => advance(3)}>+3 days</button><button className="secondary-button" onClick={reset}>Reset scenario</button></div></>}</div> : <div className="timeline-list">{events.length === 0 ? <EmptyState title="No audit entries">Actions will appear here as the demo runs.</EmptyState> : events.map((event) => <article className="timeline-item" key={event.id}><strong>{event.action ?? event.type}</strong><span>{event.actor}</span><small>{formatDateTime(event.ts)}{event.reason ? ` · ${event.reason}` : ""}</small></article>)}</div>}<div className="outbox-panel"><h3>Outbox</h3>{notifications.length === 0 ? <p className="muted">No notifications sent.</p> : notifications.map((item) => <article className="notification-item" key={item.id}><strong>{item.subject}</strong><span>To {item.to_role_or_user}</span><p>{item.body}</p></article>)}</div></section>;
+}
+
 function stateTone(state: TaskState) {
   if (state === "DONE") return "good";
   if (state === "REJECTED" || state === "BLOCKED") return "warning";
@@ -321,6 +341,8 @@ function Shell() {
             <QueueView />
           ) : active === "Approvals" ? (
             <ApprovalsView />
+          ) : active === "Simulation" || active === "Audit" ? (
+            <AdminView mode={active} />
           ) : active === "My hires" || active === "Command center" ? (
             selectedHire ? (detailView === "plan" ? <PlanView hire={selectedHire} onBack={() => setDetailView("overview")} /> : detailView === "risks" ? <RisksView hire={selectedHire} /> : detailView === "graph" ? <GraphView hire={selectedHire} /> : <HireOverview hire={selectedHire} onBack={() => setSelectedHire(null)} onPlan={() => setDetailView("plan")} onRisks={() => setDetailView("risks")} onGraph={() => setDetailView("graph")} />) :
             <HiresDashboard onSelect={setSelectedHire} onNew={() => setActive("New hire")} />

@@ -85,6 +85,45 @@ class ApprovalRequest(BaseModel):
     comment: str | None = None
 
 
+class EventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    ts: datetime
+    employee_id: str
+    task_id: str | None
+    type: str
+    actor: str
+    payload: dict[str, object]
+
+
+class AuditResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    ts: datetime
+    actor: str
+    action: str
+    entity_type: str
+    entity_id: str
+    before: dict[str, object]
+    after: dict[str, object]
+    reason: str | None
+
+
+class NotificationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    ts: datetime
+    employee_id: str
+    to_role_or_user: str
+    subject: str
+    body: str
+    related_task_id: str | None
+    status: str
+
+
 class HireResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
