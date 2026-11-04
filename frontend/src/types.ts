@@ -56,3 +56,33 @@ export type Readiness = {
   breakdown: Record<string, number>;
   drivers: string[];
 };
+
+export type TaskState =
+  | "NOT_STARTED"
+  | "READY"
+  | "IN_PROGRESS"
+  | "BLOCKED"
+  | "REJECTED"
+  | "DONE"
+  | "SKIPPED";
+
+export type Task = {
+  id: string;
+  template_key: string;
+  title: string;
+  state: TaskState;
+  due_date: string;
+  owner_role: Role;
+  assignee_user_id: string | null;
+  duration_days: number;
+  is_critical: boolean;
+  is_mandatory: boolean;
+  is_compliance: boolean;
+  outcome_tags: string[];
+  meta: Record<string, unknown>;
+};
+
+export type Plan = {
+  tasks: Task[];
+  edges: { from: string; to: string }[];
+};

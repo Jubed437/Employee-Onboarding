@@ -58,3 +58,6 @@ retrieval component rather than coupling vector storage to core onboarding table
 - Hire Overview data is served through typed readiness snapshot endpoints. The
   create flow continues to use the backend plan generator, so new hires receive
   the same deterministic plan as API-created employees.
+- Task plans are exposed with dependency edges, while `/tasks/mine` scopes
+  queues by owner role. Frontend task transitions call the existing audited
+  state machine rather than duplicating workflow rules in components.

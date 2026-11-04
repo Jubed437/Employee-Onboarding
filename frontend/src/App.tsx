@@ -6,7 +6,15 @@ import { AuthProvider } from "./auth";
 import { useAuth } from "./auth-hook";
 import { EmptyState, ErrorState, ScoreGauge, StatusBadge } from "./components";
 import { useOnboardingStream, useSimulationClock } from "./hooks";
-import type { Hire, HireCreate, Persona, Readiness, Role } from "./types";
+import type {
+  Hire,
+  HireCreate,
+  Persona,
+  Readiness,
+  Role,
+  Task,
+  TaskState,
+} from "./types";
 
 const navigation: Record<Role, string[]> = {
   ADMIN: ["Command center", "Approvals", "Simulation", "Audit"],
@@ -136,7 +144,7 @@ function CreateHire({ onCreated, onCancel }: { onCreated: (hire: Hire) => void; 
   );
 }
 
-function HireOverview({ hire, onBack }: { hire: Hire; onBack: () => void }) {
+function HireOverview({ hire, onBack, onPlan }: { hire: Hire; onBack: () => void; onPlan: () => void }) {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -147,7 +155,10 @@ function HireOverview({ hire, onBack }: { hire: Hire; onBack: () => void }) {
       <button className="back-button" onClick={onBack}>← All hires</button>
       <div className="section-heading">
         <div><p className="eyebrow">Hire overview</p><h2>{hire.full_name}</h2><p className="muted">{hire.email} · Joining {formatDate(hire.join_date)}</p></div>
-        {readiness && <StatusBadge label={readiness.band.replace("_", " ")} tone={readiness.band === "READY" ? "good" : "warning"} />}
+        <div className="heading-actions">
+          <button className="secondary-button" onClick={onPlan}>View plan</button>
+          {readiness && <StatusBadge label={readiness.band.replace("_", " ")} tone={readiness.band === "READY" ? "good" : "warning"} />}
+        </div>
       </div>
       {error && <ErrorState message={error} />}
       {readiness ? (
@@ -159,6 +170,67 @@ function HireOverview({ hire, onBack }: { hire: Hire; onBack: () => void }) {
       ) : !error ? <div className="loading-panel">Loading readiness…</div> : null}
     </section>
   );
+}
+
+function PlanView({ hire, onBack }: { hire: Hire; onBack: () => void }) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selected, setSelected] = useState<Task | null>(null);
+  const [filter, setFilter] = useState<TaskState | "ALL">("ALL");
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    api.plan(hire.id).then((plan) => setTasks(plan.tasks)).catch(() => setError("Could not load the onboarding plan"));
+  }, [hire.id]);
+  const visible = filter === "ALL" ? tasks : tasks.filter((task) => task.state === filter);
+  return (
+    <section>
+      <button className="back-button" onClick={onBack}>← {hire.full_name} overview</button>
+      <div className="section-heading"><div><p className="eyebrow">Onboarding plan</p><h2>Task plan</h2></div><select className="filter-select" value={filter} onChange={(event) => setFilter(event.target.value as TaskState | "ALL")}><option value="ALL">All states</option>{["READY", "IN_PROGRESS", "BLOCKED", "REJECTED", "DONE", "SKIPPED"].map((state) => <option key={state}>{state}</option>)}</select></div>
+      {error && <ErrorState message={error} />}
+      {!error && tasks.length === 0 && <div className="loading-panel">Loading plan…</div>}
+      {tasks.length > 0 && <div className="task-table"><div className="task-row task-header"><span>ID</span><span>Task</span><span>Owner</span><span>Due</span><span>State</span></div>{visible.map((task) => <button className="task-row task-button" key={task.id} onClick={() => setSelected(task)}><span className="task-key">{task.template_key}</span><span><strong>{task.title}</strong>{task.is_critical && <small>Critical gate</small>}</span><span>{task.owner_role}</span><span>{formatDate(task.due_date)}</span><StatusBadge label={task.state.replace("_", " ")} tone={stateTone(task.state)} /></button>)}</div>}
+      {selected && <TaskDrawer task={selected} onClose={() => setSelected(null)} onUpdated={(updated) => { setTasks((current) => current.map((task) => task.id === updated.id ? updated : task)); setSelected(updated); }} />}
+    </section>
+  );
+}
+
+function TaskDrawer({ task, onClose, onUpdated }: { task: Task; onClose: () => void; onUpdated: (task: Task) => void }) {
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  async function transition(to: TaskState) {
+    try {
+      onUpdated(await api.transitionTask(task.id, to, reason || undefined));
+      setReason("");
+    } catch {
+      setError("That transition is not available for the current role or state.");
+    }
+  }
+  return <aside className="drawer" aria-label="Task details"><button className="drawer-close" onClick={onClose}>×</button><p className="eyebrow">{task.template_key}</p><h2>{task.title}</h2><StatusBadge label={task.state.replace("_", " ")} tone={stateTone(task.state)} /><dl className="task-details"><div><dt>Owner</dt><dd>{task.owner_role}</dd></div><div><dt>Due</dt><dd>{formatDate(task.due_date)}</dd></div><div><dt>Duration</dt><dd>{task.duration_days} business days</dd></div></dl>{error && <ErrorState message={error} />}{["REJECTED", "BLOCKED"].includes(task.state) && <label><span>Reason</span><textarea value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Explain the change" required /></label>}<div className="drawer-actions">{task.state === "READY" && <button className="primary-button compact-button" onClick={() => transition("IN_PROGRESS")}>Start</button>}{task.state === "IN_PROGRESS" && <><button className="primary-button compact-button" onClick={() => transition("DONE")}>Complete</button><button className="secondary-button" onClick={() => transition("REJECTED")}>Reject</button></>}{task.state === "REJECTED" && <button className="primary-button compact-button" onClick={() => transition("IN_PROGRESS")}>Resubmit</button>}</div></aside>;
+}
+
+function QueueView() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    api.myTasks().then(setTasks).catch(() => setError("Could not load your task queue"));
+  }, []);
+  return <section><div className="section-heading"><div><p className="eyebrow">Owner queue</p><h2>Tasks assigned to your role</h2></div></div>{error && <ErrorState message={error} />}{tasks.length === 0 && !error ? <EmptyState title="Queue is clear">No tasks are currently assigned to you.</EmptyState> : <div className="task-table">{tasks.map((task) => <div className="task-row" key={task.id}><span className="task-key">{task.template_key}</span><span><strong>{task.title}</strong></span><span>{task.owner_role}</span><span>{formatDate(task.due_date)}</span><StatusBadge label={task.state.replace("_", " ")} tone={stateTone(task.state)} /></div>)}</div>}</section>;
+}
+
+function NewHireView() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    api.myTasks().then(setTasks).catch(() => setError("Could not load your checklist"));
+  }, []);
+  const completed = tasks.filter((task) => task.state === "DONE" || task.state === "SKIPPED").length;
+  return <section><p className="eyebrow">Your onboarding</p><h2>Your checklist</h2><p className="muted">Complete each step to keep your first day on track.</p>{error && <ErrorState message={error} />}{tasks.length > 0 && <><div className="checklist-progress"><strong>{completed} of {tasks.length} complete</strong><span className="mini-bar"><i style={{ width: `${(completed / tasks.length) * 100}%` }} /></span></div><div className="checklist">{tasks.map((task) => <div className="checklist-item" key={task.id}><span className={`check-icon ${task.state === "DONE" ? "checked" : ""}`}>{task.state === "DONE" ? "✓" : "○"}</span><div><strong>{task.title}</strong><small>{task.state.replace("_", " ")} · Due {formatDate(task.due_date)}</small></div></div>)}</div></>}</section>;
+}
+
+function stateTone(state: TaskState) {
+  if (state === "DONE") return "good";
+  if (state === "REJECTED" || state === "BLOCKED") return "warning";
+  if (state === "IN_PROGRESS") return "neutral";
+  return "neutral";
 }
 
 function Field({ label, value, onChange, type = "text", required = false }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean }) {
@@ -179,6 +251,7 @@ function Shell() {
   const connected = useOnboardingStream();
   const [active, setActive] = useState(navigation[user?.role ?? "ADMIN"][0]);
   const [selectedHire, setSelectedHire] = useState<Hire | null>(null);
+  const [showPlan, setShowPlan] = useState(false);
   if (!user) return <LoginScreen />;
   const items = navigation[user.role];
   return (
@@ -191,7 +264,7 @@ function Shell() {
             <button
               className={active === item ? "nav-item active" : "nav-item"}
               key={item}
-              onClick={() => { setActive(item); setSelectedHire(null); }}
+              onClick={() => { setActive(item); setSelectedHire(null); setShowPlan(false); }}
             >
               {item}
             </button>
@@ -216,8 +289,12 @@ function Shell() {
           </div>
         </header>
         <main className="content">
-          {active === "My hires" || active === "Command center" ? (
-            selectedHire ? <HireOverview hire={selectedHire} onBack={() => setSelectedHire(null)} /> :
+          {active === "My checklist" ? (
+            <NewHireView />
+          ) : active === "My queue" ? (
+            <QueueView />
+          ) : active === "My hires" || active === "Command center" ? (
+            selectedHire ? (showPlan ? <PlanView hire={selectedHire} onBack={() => setShowPlan(false)} /> : <HireOverview hire={selectedHire} onBack={() => setSelectedHire(null)} onPlan={() => setShowPlan(true)} />) :
             <HiresDashboard onSelect={setSelectedHire} onNew={() => setActive("New hire")} />
           ) : active === "New hire" ? (
             <CreateHire onCreated={(hire) => { setSelectedHire(hire); setActive(user.role === "ADMIN" ? "Command center" : "My hires"); }} onCancel={() => setActive("My hires")} />
