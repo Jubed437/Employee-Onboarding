@@ -47,3 +47,7 @@ retrieval component rather than coupling vector storage to core onboarding table
 - Readiness is a deterministic weighted score over critical completion, slack,
   compliance, and timeliness. Each persisted snapshot includes its formula
   components and task-level drivers for explainability.
+- Monitor evaluation is synchronous for the MVP and publishes in-process events
+  for the SSE stream. Integration calls use database-backed mocks; notifications
+  are written to the outbox without external network access. `make seed` creates
+  the three synthetic demo hires and initializes simulated time.
