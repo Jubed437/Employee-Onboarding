@@ -18,6 +18,7 @@ Backend prerequisites: Python 3.12+.
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e "backend[dev]"
+alembic -c alembic.ini upgrade head
 python -m uvicorn app.main:app --app-dir backend --reload
 ```
 
@@ -36,4 +37,5 @@ Run checks from the repository root:
 make test
 make lint
 make frontend-build
+make db-upgrade
 ```

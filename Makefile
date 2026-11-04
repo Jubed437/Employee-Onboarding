@@ -1,7 +1,10 @@
-.PHONY: dev backend-test backend-lint frontend-build frontend-lint test lint
+.PHONY: dev db-upgrade backend-test backend-lint frontend-build frontend-lint test lint
 
 dev:
 	python -m uvicorn app.main:app --app-dir backend --reload
+
+db-upgrade:
+	alembic -c alembic.ini upgrade head
 
 backend-test:
 	python -m pytest backend/tests
